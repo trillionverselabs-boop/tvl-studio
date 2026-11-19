@@ -85,3 +85,26 @@ def test_dialogue_only_shot_omits_the_redundant_title_bar(tmp_path):
     proj["shots"][0]["title"] = "A distinct action title"
     hf = assemble.build_film(proj, brands.get_kit("tvl"), pdir)
     assert 'id="s01-bar"' in (hf / "compositions" / "s01.html").read_text()
+
+
+def test_captions_can_be_turned_off_but_voiceover_stays(tmp_path):
+    proj, pdir = _ready_project(tmp_path)
+    proj["captions"] = False
+    hf = assemble.build_film(proj, brands.get_kit("tvl"), pdir)
+    scene = (hf / "compositions" / "s01.html").read_text()
+    assert "s01-cap0" not in scene          # no caption elements
+    assert "Line one." not in scene          # no dialogue text on screen
+    assert 'data-start="0.6"' in scene       # VO audio still present
+    # default stays on
+    proj["captions"] = True
+    hf = assemble.build_film(proj, brands.get_kit("tvl"), pdir)
+    assert "s01-cap0" in (hf / "compositions" / "s01.html").read_text()
+
+
+def test_kit_captions_default_flows_into_new_projects():
+    from tvl_studio.engine import storyboard
+    proj = storyboard.create("Cap Test", "INT. ROOM — DAY\n\nGUIDE: Hello.\n",
+                             captions=False)
+    assert proj["captions"] is False
+    proj2 = storyboard.create("Cap Test 2", "INT. ROOM — DAY\n\nGUIDE: Hello.\n")
+    assert proj2["captions"] is True

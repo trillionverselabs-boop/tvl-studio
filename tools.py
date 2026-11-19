@@ -40,7 +40,8 @@ def register_tools(ctx) -> None:
                 name=str(params.get("name", "")),
                 script=str(params.get("script", "")),
                 brand=str(params.get("brand", brands.DEFAULT_KIT)),
-                style=str(params.get("style", "")))
+                style=str(params.get("style", "")),
+                captions=params.get("captions"))
             return _ok({"project": storyboard.summary(proj),
                         "cast": proj["cast"],
                         "next_action": storyboard.next_action(proj)})
@@ -56,7 +57,8 @@ def register_tools(ctx) -> None:
          {"name": {"type": "string", "description": "Project/film name."},
           "script": {"type": "string", "description": "The full script text."},
           "brand": {"type": "string", "description": "Brand kit id (studio_brands lists them). Default 'script-driven' lets the script set the visuals; 'tvl' applies TVL branding to all media."},
-          "style": {"type": "string", "description": "Optional extra visual style line for this film only."}},
+          "style": {"type": "string", "description": "Optional extra visual style line for this film only."},
+          "captions": {"type": "boolean", "description": "Show dialogue captions on screen. Default true; set false for clean cinematic frames (voiceover still plays)."}},
          ["name", "script"], h_import)
 
     def h_list(params, **kw):

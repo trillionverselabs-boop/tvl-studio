@@ -41,6 +41,10 @@ image style-lock (`visual.style_prompt`), video palette/fonts, voices
 `tvl` (TVL look) and `script-driven` (default; visuals follow the script).
 The app UI is always TVL-branded regardless of kit.
 
+**Captions:** `studio_import_script(captions=false)` renders clean cinematic
+frames — voiceover still plays, no dialogue text on screen (Lisa's preference
+for the drama lane, 2026-11-19). Kits can also set `text.captions`.
+
 ## Limits (honest, verified 2026-11-19)
 
 - 12 Kokoro voices; characters beyond that share voices. No cloning/lip-sync.

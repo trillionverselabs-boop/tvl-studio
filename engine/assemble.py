@@ -47,7 +47,8 @@ def _scene_html(shot: dict, proj: dict, kit: dict, slot: float, index: int) -> s
     vo_dur = shot.get("duration") or (slot - PAD_S)
     captions = []
     t = LEAD_S
-    for i, line in enumerate(shot["lines"]):
+    show_captions = proj.get("captions", True)
+    for i, line in enumerate(shot["lines"] if show_captions else []):
         share = max(0.8, vo_dur * len(line["text"]) / total_chars)
         text = line["text"]
         cap_max = kit["text"]["caption_max_chars"]

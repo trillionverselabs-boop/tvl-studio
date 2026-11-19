@@ -6,7 +6,7 @@ import { host, haptic, useValue, Badge, Button, ROUTES_AREA, SIDEBAR_NAV_AREA } 
 import { jsx, jsxs } from 'react/jsx-runtime'
 import { useState, useEffect, useCallback } from 'react'
 
-const BUILD = '0.1.0 · ui1'
+const BUILD = '0.1.1 · ui2'
 const NAME = 'TVL Studio'
 
 // TVL internal design language (docs/TVL-INTERNAL-DESIGN-LANGUAGE.md).

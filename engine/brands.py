@@ -93,6 +93,7 @@ def _normalize(kit: dict) -> dict:
 
     text = dict(kit.get("text") or {})
     text.setdefault("tone", "")
+    text["captions"] = bool(text.get("captions", True))
     try:
         text["caption_max_chars"] = int(text.get("caption_max_chars", 90))
     except (TypeError, ValueError):

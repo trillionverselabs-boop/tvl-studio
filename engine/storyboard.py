@@ -107,7 +107,7 @@ def status(proj: dict) -> str:
 
 
 def create(name: str, script: str, brand: str = brands.DEFAULT_KIT,
-           style: str = "") -> dict:
+           style: str = "", captions: bool | None = None) -> dict:
     if not isinstance(name, str) or not name.strip():
         raise ValueError("project name is empty")
     kit = brands.get_kit(brand)
@@ -137,6 +137,7 @@ def create(name: str, script: str, brand: str = brands.DEFAULT_KIT,
 
     proj = {
         "id": pid, "name": name.strip(), "brand": kit["id"], "style": style.strip(),
+        "captions": kit["text"]["captions"] if captions is None else bool(captions),
         "script": script, "mode": parsed["mode"], "cast": cast,
         "shots": [
             {**s, "image": None, "image_prompt": "", "audio": None, "duration": None}
