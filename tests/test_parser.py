@@ -47,3 +47,8 @@ def test_empty_script_raises():
 def test_parenthetical_becomes_direction():
     out = parse_script("INT. ROOM — DAY\n\n(whispering)\nGUIDE: Keep it quiet.\n")
     assert out["shots"][0]["direction"] == "whispering"
+
+
+def test_dialogue_only_shot_titles_by_scene_not_first_line():
+    out = parse_script("INT. THE LAB — NIGHT\n\nGUIDE: Every big idea starts as a paper.\n")
+    assert out["shots"][0]["title"] == "THE LAB — NIGHT"

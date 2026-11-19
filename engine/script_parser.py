@@ -118,10 +118,10 @@ def parse_script(script: str) -> dict:
 
     flush()
 
-    # A scene with several dialogue-only shots stays one shot per scene unless
-    # action lines split it; title each shot from its scene + first words.
+    # Title each shot from its action, or its scene when it is dialogue-only
+    # (repeating the first dialogue line in the title bar reads as a bug).
     for shot in shots:
-        first = shot["lines"][0]["text"] if shot["lines"] else shot["action"]
+        first = shot["action"] or shot["scene"]
         shot["title"] = (first[:60] + "…") if len(first) > 60 else first
     if not shots:
         raise ValueError("no shots found in script")
