@@ -11,7 +11,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-PLUGIN_ID = "example-plugin"
+PLUGIN_ID = "tvl-studio"
 
 
 def _hermes_home() -> Path:

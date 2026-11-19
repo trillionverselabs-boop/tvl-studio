@@ -10,7 +10,7 @@ REPO = Path(__file__).resolve().parent.parent
 # a checkout with a hyphenated name cannot be imported as a package. Give sys.path
 # a directory that holds the package under a valid identifier.
 _shim = Path(tempfile.mkdtemp(prefix="plugin-import-"))
-_link = _shim / "example_plugin"
+_link = _shim / "tvl_studio"
 if not _link.exists():
     _link.symlink_to(REPO, target_is_directory=True)
 sys.path.insert(0, str(_shim))

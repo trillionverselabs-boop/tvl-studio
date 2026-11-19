@@ -1,48 +1,74 @@
 import json
+from pathlib import Path
 
-import pytest
+import yaml
 
-from example_plugin import tools
-from example_plugin.paths import data_root
+from tvl_studio import tools
+
+REPO = Path(__file__).resolve().parent.parent
 
 
-def test_the_tool_is_registered_and_echoes():
-    class Ctx:
-        def __init__(self):
-            self.handlers = {}
-            self.names = []
+class Ctx:
+    def __init__(self):
+        self.handlers = {}
+        self.names = []
 
-        def register_tool(self, name, toolset, schema, handler):
-            self.names.append(name)
-            self.handlers[name] = handler
+    def register_tool(self, name, toolset, schema, handler):
+        self.names.append(name)
+        self.handlers[name] = handler
 
+
+def _ctx():
     c = Ctx()
     tools.register_tools(c)
-    assert c.names == ["example_echo"]
-    out = json.loads(c.handlers["example_echo"]({"text": "hi"}))
-    assert out["echo"] == "hi"
+    return c
 
 
-def test_a_malformed_run_id_is_a_json_error_not_a_crash():
-    class Ctx:
-        def __init__(self):
-            self.handlers = {}
+def test_registered_tools_match_the_manifest():
+    manifest = yaml.safe_load((REPO / "plugin.yaml").read_text())
+    assert sorted(_ctx().names) == sorted(manifest["provides_tools"])
 
-        def register_tool(self, name, toolset, schema, handler):
-            self.handlers[name] = handler
 
-    c = Ctx()
-    tools.register_tools(c)
-    out = json.loads(c.handlers["example_echo"]({"text": "hi", "run_id": "../evil"}))
+SCRIPT = """CAST: GUIDE — a friendly cyan robot
+CAST: SKEPTIC — a small red stick figure
+
+INT. THE LAB — NIGHT
+
+GUIDE: Every big idea starts as a paper.
+SKEPTIC: And most stay unread.
+"""
+
+
+def test_import_builds_a_storyboard_with_cast_and_next_action():
+    c = _ctx()
+    out = json.loads(c.handlers["studio_import_script"](
+        {"name": "Test Film", "script": SCRIPT}))
+    assert "error" not in out
+    assert out["project"]["shots"] == 1
+    assert set(out["cast"]) == {"GUIDE", "SKEPTIC"}
+    voices = {out["cast"][k]["voice"] for k in ("GUIDE", "SKEPTIC")}
+    assert len(voices) == 2  # distinct voice per character
+    assert out["next_action"]["action"] == "generate_portrait"
+
+
+def test_bad_project_id_is_a_json_error_not_a_crash():
+    c = _ctx()
+    out = json.loads(c.handlers["studio_status"]({"project": "../../etc"}))
     assert "error" in out
 
 
-@pytest.mark.parametrize("bad", ["../../escape", "/etc", ".."])
-def test_out_dir_cannot_escape_the_data_dir(bad):
-    with pytest.raises(ValueError):
-        tools.resolve_out_dir(bad)
+def test_attach_missing_image_is_a_json_error():
+    c = _ctx()
+    out = json.loads(c.handlers["studio_import_script"](
+        {"name": "T", "script": SCRIPT}))
+    pid = out["project"]["id"]
+    out = json.loads(c.handlers["studio_attach_image"](
+        {"project": pid, "shot_id": "s01", "image_path": "/nonexistent/x.png"}))
+    assert "error" in out
 
 
-def test_out_dir_inside_the_data_dir_is_allowed():
-    p = tools.resolve_out_dir("records")
-    assert str(p).startswith(str(data_root().resolve()))
+def test_brands_list_includes_bundled_kits():
+    c = _ctx()
+    out = json.loads(c.handlers["studio_brands"]({"action": "list"}))
+    ids = {b["id"] for b in out["brands"]}
+    assert {"tvl", "script-driven"} <= ids

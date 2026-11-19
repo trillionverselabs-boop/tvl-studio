@@ -1,45 +1,79 @@
-# example-plugin — the template
+# TVL Studio
 
-A Hermes plugin scaffold that is already shaped the way the catalog review wants it.
-Copy it, rename it, replace the example tool.
+**Script in, film out.** Import a script, get a storyboard, generate the images
+with your agent, record multi-character voiceovers, and render a finished MP4 —
+with one **brand kit** applying a single branding across images, video, text,
+voices and music.
 
+A Hermes plugin: agent tools any bot can drive repeatably, plus a TVL-branded
+storyboard board in the desktop app (left nav → **TVL Studio**).
+
+## The pipeline
+
+```mermaid
+flowchart LR
+  A[Script] --> B[Storyboard parser<br/>scenes · cast · dialogue]
+  B --> C[Portraits + shot images<br/>agent's image_generate · Portal]
+  C --> D[Voiceover<br/>Kokoro TTS · one voice per character]
+  D --> E[HyperFrames assembly<br/>captions · push-ins · brand palette]
+  E --> F[check gate → render]
+  F --> G[ffmpeg finish<br/>−16 LUFS · fades]
+  G --> H[MP4 + library]
 ```
-cp -r ~/work/plugin-template ~/work/<your-plugin>
-```
 
-## Rename (five places, all of them)
+- **Script formats:** screenplay (`INT./EXT.` headings, `CHARACTER: dialogue`,
+  `CAST: NAME — description`), markdown scenes, or plain prose (narrated).
+- **Characters:** each gets a distinct Kokoro voice and one reference portrait;
+  shot images use the portraits as references so characters stay consistent.
+- **Brand kits:** dropdown in the board, `studio_brands` for agents. Bundled:
+  `tvl` (TVL look on all media) and `script-driven` (default — visuals follow
+  the script). A kit = image style-lock + video palette/fonts + voice casting +
+  music file. The **app UI is always TVL-branded**; the kit brands the media.
+- **Free where it counts:** TTS, assembly, render and finish run locally at $0.
+  Only image generation spends Portal credits (via the host's `image_generate`).
 
-| What | Where |
+## Agent tools
+
+| Tool | Does |
 |---|---|
-| `name:` | `plugin.yaml` |
-| package name in the shim | `__init__.py` (`__package__`), `tests/conftest.py`, `scripts/test.sh` |
-| `{"name": ...}` | `dashboard/manifest.json` |
-| `id:` and the ids in `register` | `desktop/plugin.js` |
-| tool prefix | `tools.py` (`provides_tools` in the manifest must match `register_tool` names) |
+| `studio_import_script` | script → project + storyboard + cast + first next_action |
+| `studio_status` | storyboard state + the single next action to perform |
+| `studio_attach_image` / `studio_attach_portrait` | attach generated files |
+| `studio_voiceover` | Kokoro TTS per line, per-character voices, ffmpeg concat |
+| `studio_assemble` | HyperFrames composition → check gate → render → loudness finish |
+| `studio_list` / `studio_brands` | projects; brand kits list/save/apply |
 
-The **folder name must equal the plugin id** — the desktop loader scans for it.
+The repeatable loop is documented in the bundled skill (`tvl-studio:tvl-studio`).
 
-## What is already done for you
+## Limits (honest)
 
-- `register(ctx)` that runs in isolation (`hermes plugins validate` probes it)
-- `paths.py` using `hermes_constants.get_hermes_home()` — the profile-correct home
-- one tool whose handler returns JSON errors instead of raising
-- `run_id` / `out_dir` guards, with the tests that prove them
-- a dashboard namespace loaded **by spec** (never `sys.path`)
-- a desktop page that is its own scroll container, built only from the SDK
-- `scripts/test.sh` that works from a hyphenated checkout and honours `PYTHON=`
-- `docs/DISCLOSURE.md`, `docs/MODEL-CONTROLLED-INPUTS.md` and `CHECKLIST.md`
+- 12 Kokoro voices; more characters share voices. No cloning, no lip sync.
+- Images: host `image_generate` — 1K/2K, ≤4 reference images, credits apply.
+- No generated live-action clips yet (Portal `video_generate` is a later phase);
+  motion comes from HyperFrames animation.
+- Music: a kit file you own/licence (inside the data dir); no auto-score yet.
+- Film length: no hard cap; render time and RAM are the real limits.
 
-## Verify before building on it
+## Install
+
+Desktop app → **Capabilities → Plugins → Install from Git** →
+`https://github.com/trillionverselabs-boop/tvl-studio` → tick **Desktop** →
+Install (leave *Pin to commit* empty while it evolves). Private repo: complete
+the one-time Git credential prompt if asked.
+
+Requires on the gateway machine: Node/npx (Hermes ships it), ffmpeg (Hermes
+ships it), HyperFrames via npx, and a kokoro-onnx Python for TTS (set
+`TVL_STUDIO_TTS_PYTHON` if not at `~/work/arena-demo-video/.venv/bin/python`).
+
+## Verify
 
 ```bash
-cd ~/work/<your-plugin>
-hermes plugins validate . --install-deps      # -> Validation passed.
-PYTHON=<a venv with pytest> ./scripts/test.sh -q
+hermes plugins validate . --install-deps   # Validation passed.
+PYTHON=<venv with pytest+fastapi> ./scripts/test.sh -q
 ```
 
-## See also
+## Licence
 
-- `~/work/strategic-arena/docs/MARKETPLACE.md` — the whole submission loop, from
-  first PR to re-pin, including the permission trap that costs an hour.
-- `CHECKLIST.md` in this folder — the pre-flight, in order.
+MIT. Built on HyperFrames (HeyGen) and Kokoro TTS; orchestration concepts
+inspired by Imagination Studio (Keys/drowzeys + Sam Wasserman, Apache-2.0) —
+no code copied from it. See CREDITS.md.
