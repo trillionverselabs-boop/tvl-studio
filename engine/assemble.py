@@ -70,6 +70,16 @@ def _scene_html(shot: dict, proj: dict, kit: dict, slot: float, index: int) -> s
 
     title = _esc(shot.get("title") or shot["scene"])
     scene_label = _esc(shot["scene"].upper())
+    # Dialogue-only shots title by scene; showing it again in the big bar
+    # duplicates the micro label and crowds the lower third — omit it then.
+    show_bar = (shot.get("title") or shot["scene"]).strip().lower() != shot["scene"].strip().lower()
+    bar_html = (
+        f'    <div id="{sid}-bar" class="{sid}-bar clip" data-start="0.4" '
+        f'data-duration="{slot - 0.6:.2f}" data-track-index="3">{title}</div>\n'
+    ) if show_bar else ""
+    bar_tween = (
+        f'tl.fromTo("#{sid}-bar", {{opacity:0, x:-30}}, {{opacity:1, x:0, duration:0.5, ease:"power4.out"}}, 0.4);\n'
+    ) if show_bar else ""
     page = f"{index + 1:02d} / {len(proj['shots']):02d}"
     return f"""<template>
 <style>
@@ -84,8 +94,7 @@ def _scene_html(shot: dict, proj: dict, kit: dict, slot: float, index: int) -> s
   <div id="{sid}-root">
     <img id="{sid}-img" class="{sid}-img" src="../assets/{img}" alt="" data-layout-allow-overflow>
     <div id="{sid}-micro" class="{sid}-micro clip" data-start="0.2" data-duration="{slot - 0.4:.2f}" data-track-index="2">{scene_label}</div>
-    <div id="{sid}-bar" class="{sid}-bar clip" data-start="0.4" data-duration="{slot - 0.6:.2f}" data-track-index="3">{title}</div>
-    <div id="{sid}-page" class="{sid}-page clip" data-start="0.2" data-duration="{slot - 0.4:.2f}" data-track-index="4">{page}</div>
+{bar_html}    <div id="{sid}-page" class="{sid}-page clip" data-start="0.2" data-duration="{slot - 0.4:.2f}" data-track-index="4">{page}</div>
 {chr(10).join(captions)}
     <audio id="{sid}-vo" class="clip" src="../assets/{vo}" data-start="{LEAD_S}" data-track-index="5" data-volume="1"></audio>
   </div>
@@ -94,8 +103,7 @@ def _scene_html(shot: dict, proj: dict, kit: dict, slot: float, index: int) -> s
 const tl = gsap.timeline({{ paused: true }});
 tl.fromTo("#{sid}-img", {{scale:1.0}}, {{scale:1.06, duration:{slot:.2f}, ease:"none"}}, 0);
 tl.fromTo("#{sid}-micro", {{opacity:0, y:-14}}, {{opacity:1, y:0, duration:0.4, ease:"power3.out"}}, 0.2);
-tl.fromTo("#{sid}-bar", {{opacity:0, x:-30}}, {{opacity:1, x:0, duration:0.5, ease:"power4.out"}}, 0.4);
-tl.fromTo("#{sid}-page", {{opacity:0}}, {{opacity:1, duration:0.4, ease:"power2.out", immediateRender:false}}, 0.2);
+{bar_tween}tl.fromTo("#{sid}-page", {{opacity:0}}, {{opacity:1, duration:0.4, ease:"power2.out", immediateRender:false}}, 0.2);
 window.__timelines["{sid}"] = tl;
 </script>
 </template>

@@ -73,3 +73,15 @@ def test_music_inside_data_root_is_copied(tmp_path):
     hf = assemble.build_film(proj, kit, pdir)
     assert (hf / "assets" / "music.mp3").exists()
     assert 'data-volume="0.18"' in (hf / "index.html").read_text()
+
+
+def test_dialogue_only_shot_omits_the_redundant_title_bar(tmp_path):
+    proj, pdir = _ready_project(tmp_path)  # SCRIPT is dialogue-only
+    hf = assemble.build_film(proj, brands.get_kit("tvl"), pdir)
+    scene = (hf / "compositions" / "s01.html").read_text()
+    assert 'id="s01-bar"' not in scene
+    assert "#s01-bar" not in scene  # no orphan tween either
+    # an action-titled shot keeps its bar
+    proj["shots"][0]["title"] = "A distinct action title"
+    hf = assemble.build_film(proj, brands.get_kit("tvl"), pdir)
+    assert 'id="s01-bar"' in (hf / "compositions" / "s01.html").read_text()

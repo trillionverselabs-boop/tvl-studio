@@ -1,7 +1,15 @@
 # Phase 2 — Motion & Lip Sync (the "characters actually talk" upgrade)
 
-**Status:** scoped, awaiting Lisa's go on the first probe. Nothing here spends credits
-until approved. All prices verified 2026-11-19 (see IMAGE-MODELS.md §6 for sources).
+**Status:** Probe 1 DONE 2026-11-19 (Lisa approved). Result: `video_generate` served
+**fal-ai/pixverse/v6/image-to-video** (provider fal, despite `video_gen.provider: nous` —
+the Portal path delegates video to FAL). 5 s, 1280×720, ~1.4 MB. Frame review: coherent,
+cinematic, clean faces; minor hand/prop-intersection artifacts (watch for temporal flicker
+on hands). **FAL requires a PUBLIC HTTPS image_url** — local paths fail with
+file_download_error. Working pattern: upload the still to litterbox.catbox.moe (24 h
+temporary host, `curl -F'reqtype=fileupload' -F'time=24h' -F'fileToUpload=@<png>'
+https://litterbox.catbox.moe/resources/internals/api.php`), pass that URL, download the
+returned fal.media MP4 locally. Probe clip: cache/scratch/tvl-motion-probe.mp4.
+Lip-sync probes still awaiting approval.
 
 ## The upgrade in one sentence
 
